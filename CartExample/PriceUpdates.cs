@@ -2,6 +2,7 @@
 {
     public interface PriceUpdates
     {
-        float PriceForProuct(string productId);
+        double PriceForProduct(string productId);
+        void PricesChanged(int v);
     }
 }
