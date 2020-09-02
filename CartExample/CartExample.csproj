@@ -39,9 +39,10 @@
   <ItemGroup>
     <Compile Include="Cart.cs" />
     <Compile Include="CartArchive.cs" />
+    <Compile Include="PriceUpdates.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="PriceChecker.cs" />
-    <Compile Include="PriceCheckerTest.cs" />
+    <Compile Include="CartPriceUpdater.cs" />
+    <Compile Include="CartPriceUpdaterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
