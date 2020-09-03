@@ -16,40 +16,19 @@ namespace CartExample
 
         public Cart RecalculateCart(int CartId)
         {
-            var cartToCheck = ArchiveService.ById(CartId);
-            var changedPrices = new Dictionary<String, double>();
+            Cart cartToCheck = null; // Woher laden?
 
             if(cartToCheck == null)
             {
-                return ArchiveService.CreateNewCart();
+                // Was passiert dann?
             }
 
-            var changedPriceCount = 0;
             foreach (var pair in cartToCheck.Items)
             {
-                try
-                {
-                    var newPrice = PriceService.PriceForProduct(pair.Key);
-                    if (newPrice != pair.Value)
-                    {
-                        changedPrices.Add(pair.Key, newPrice);
-                        changedPriceCount++;
-                    }
-                }
-                catch (PriceNotFound ex)
-                {
-                   changedPrices.Add(pair.Key, 0.0);
-                }
+                // Irgendwas passiert noch mit den Einträgen
             }
-            if(changedPriceCount > 0)
-            {
-                PriceService.PricesChangedStats(changedPrices.Count);
-            }
-            foreach (var pair in changedPrices)
-            {
-                cartToCheck.Items.Remove(pair.Key);
-                cartToCheck.Items.Add(pair.Key, pair.Value);
-            }
+            // Je nachdem, ob Preise verändert werden, muss
+            // das am Price Service vermerkt werden.
 
             return cartToCheck;
         }

@@ -16,29 +16,35 @@ namespace CartExample
             objectUnderTest = new CartPriceUpdater(archiveMock.Object, priceMock.Object);
         }
 
+        /**
+         * Wird kein Cart gefunden (null-Rückgabe) soll ein neuer Cart 
+         * am Archiv erzeugt werden.
+         */
         [TestMethod]
         public void TestCreateNewCartIfNotExists()
         {
-            objectUnderTest = new CartPriceUpdater(archiveMock.Object, null);
             Cart newCart = new Cart();
 
-            archiveMock.Setup(mc => mc.ById(0815)).Returns((Cart)null);
-            archiveMock.Setup(mc => mc.CreateNewCart()).Returns(newCart);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
 
             Cart returnedCart = objectUnderTest.RecalculateCart(0815);
             Assert.AreEqual(newCart, returnedCart);
         }
 
+        /**
+         * Bei einem leeren Cart wird niemals der Preis neu ermittelt
+         */
         [TestMethod]
         public void TestEmptyCartNeverCallsPriceForProduct()
         {
             Cart cart = new Cart().withId(1);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
             Assert.AreEqual(cart, returnedCart);
 
-            priceMock.Verify(m => m.PriceForProduct(It.IsAny<string>()), Times.Never());
+            // Überprüfung?
         }
 
         [TestMethod]
@@ -46,37 +52,49 @@ namespace CartExample
         {
             Cart cart = new Cart().withId(1).addProduct("Brot", 1.69);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
-            priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.79);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
             Assert.AreEqual(1.79, cart.Items["Brot"]);
         }
 
+        /**
+         * Wird der Preis nicht verändert, so wird die Stats-Methode
+         * nicht aufgerufen.
+         */
         [TestMethod]
         public void TestCartWithoutChangeDoesNotCallStats()
         {
             Cart cart = new Cart().withId(1).addProduct("Brot", 1.69);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
-            priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.69);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChangedStats(It.IsAny<int>()), Times.Never);
+            // Überprüfung?
         }
 
+        /**
+         * Wird der Preis verändert, so wird die Stats-Methode aufgerufen.
+         */
         [TestMethod]
         public void TestCartWithChangesCallsStats()
         {
             Cart cart = new Cart().withId(1).addProduct("Brot", 1.69);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
-            priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.79);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChangedStats(1), Times.Once());
+            // Überprüfung?
         }
 
+        /**
+         * Testet viele Optionen mit einigen Produkten,
+         * deren Preise sich ändern. Auch die Statistik-Methode
+         * wird aufgerufen
+         */
         [TestMethod]
         public void TestCartCanHandleMultipleEntries()
         {
@@ -85,29 +103,33 @@ namespace CartExample
                 .addProduct("Butter", 1.19)
                 .addProduct("Marmelade", 2.69);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
-            priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.69);
-            priceMock.Setup(mc => mc.PriceForProduct("Butter")).Returns(1.29);
-            priceMock.Setup(mc => mc.PriceForProduct("Marmelade")).Returns(2.79);
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChangedStats(2), Times.Once());
             Assert.AreEqual(1.69, cart.Items["Brot"]);
             Assert.AreEqual(1.29, cart.Items["Butter"]);
             Assert.AreEqual(2.79, cart.Items["Marmelade"]);
+
+            // Überprüfung?
         }
 
+        /**
+         * Wird kein Preis gefunden, soll eine Exception fliegen.
+         * Der Preis wird zurückgesetzt und die Statistik soll nicht aktualisiert werden.
+         */
         [TestMethod]
         public void TestProductWithoutPrice()
         {
             Cart cart = new Cart().withId(1).addProduct("<UNKNOWN>", 9.99);
 
-            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
-            priceMock.Setup(mc => mc.PriceForProduct("<UNKNOWN>")).Throws(new PriceNotFound());
+            // Hier müssen ein oder mehrere Mocks vorbereitet werden
+
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
             Assert.AreEqual(0.0, cart.Items["<UNKNOWN>"]);
-            priceMock.Verify(m => m.PricesChangedStats(It.IsAny<int>()), Times.Never);
+
+            // Überprüfung?
         }
     }
 }
