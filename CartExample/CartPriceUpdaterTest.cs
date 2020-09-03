@@ -30,7 +30,7 @@ namespace CartExample
         }
 
         [TestMethod]
-        public void TestEmptyCartNeverCallsPrice()
+        public void TestEmptyCartNeverCallsPriceForProduct()
         {
             Cart cart = new Cart().withId(1);
 
@@ -62,11 +62,11 @@ namespace CartExample
             priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.69);
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChanged(It.IsAny<int>()), Times.Never);
+            priceMock.Verify(m => m.PricesChangedStats(It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
-        public void TestCartWillCallStatistics()
+        public void TestCartWithChangesCallsStats()
         {
             Cart cart = new Cart().withId(1).addProduct("Brot", 1.69);
 
@@ -74,7 +74,7 @@ namespace CartExample
             priceMock.Setup(mc => mc.PriceForProduct("Brot")).Returns(1.79);
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChanged(1), Times.Once());
+            priceMock.Verify(m => m.PricesChangedStats(1), Times.Once());
         }
 
         [TestMethod]
@@ -91,10 +91,23 @@ namespace CartExample
             priceMock.Setup(mc => mc.PriceForProduct("Marmelade")).Returns(2.79);
             Cart returnedCart = objectUnderTest.RecalculateCart(1);
 
-            priceMock.Verify(m => m.PricesChanged(2), Times.Once());
+            priceMock.Verify(m => m.PricesChangedStats(2), Times.Once());
             Assert.AreEqual(1.69, cart.Items["Brot"]);
             Assert.AreEqual(1.29, cart.Items["Butter"]);
             Assert.AreEqual(2.79, cart.Items["Marmelade"]);
+        }
+
+        [TestMethod]
+        public void TestProductWithoutPrice()
+        {
+            Cart cart = new Cart().withId(1).addProduct("<UNKNOWN>", 9.99);
+
+            archiveMock.Setup(mc => mc.ById(1)).Returns(cart);
+            priceMock.Setup(mc => mc.PriceForProduct("<UNKNOWN>")).Throws(new PriceNotFound());
+            Cart returnedCart = objectUnderTest.RecalculateCart(1);
+
+            Assert.AreEqual(0.0, cart.Items["<UNKNOWN>"]);
+            priceMock.Verify(m => m.PricesChangedStats(It.IsAny<int>()), Times.Never);
         }
     }
 }

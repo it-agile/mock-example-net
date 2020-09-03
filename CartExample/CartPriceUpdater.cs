@@ -24,17 +24,26 @@ namespace CartExample
                 return ArchiveService.CreateNewCart();
             }
 
+            var changedPriceCount = 0;
             foreach (var pair in cartToCheck.Items)
             {
-                var newPrice = PriceService.PriceForProduct(pair.Key);
-                if(newPrice != pair.Value)
+                try
                 {
-                    changedPrices.Add(pair.Key, newPrice);
+                    var newPrice = PriceService.PriceForProduct(pair.Key);
+                    if (newPrice != pair.Value)
+                    {
+                        changedPrices.Add(pair.Key, newPrice);
+                        changedPriceCount++;
+                    }
+                }
+                catch (PriceNotFound ex)
+                {
+                   changedPrices.Add(pair.Key, 0.0);
                 }
             }
-            if(changedPrices.Count > 0)
+            if(changedPriceCount > 0)
             {
-                PriceService.PricesChanged(changedPrices.Count);
+                PriceService.PricesChangedStats(changedPrices.Count);
             }
             foreach (var pair in changedPrices)
             {
